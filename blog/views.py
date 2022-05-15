@@ -38,7 +38,7 @@ def get_related_posts_count(tag):
 def serialize_tag(tag):
     return {
         'title': tag.title,
-        'posts_with_tag': len(Post.objects.filter(tags=tag)),
+        'posts_with_tag': tag.posts_count
     }
 
 
@@ -51,7 +51,7 @@ def index(request):
         order_by('published_at').prefetch_related('author').prefetch_related('tags')
     most_fresh_posts = list(fresh_posts)[-5:]
 
-    most_popular_tags = Tag.objects.popular()[:5]
+    most_popular_tags = Tag.objects.popular().annotate(posts_count=Count('posts'))[:5]
 
     context = {
         'most_popular_posts': [
