@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 
 
 class PostQuerySet(models.QuerySet):
@@ -15,6 +15,12 @@ class PostQuerySet(models.QuerySet):
             likes_amount=Count('likes', distinct=True)
         ).order_by('-likes_amount')
         return popular_posts
+
+    def prefetch_tags_count(self):
+        prefetch = Prefetch(
+            'tags',
+            queryset=Tag.objects.annotate(posts_count=Count('posts')))
+        return self.prefetch_related(prefetch)
 
     def fetch_with_comments_count(self):
         """For avoid two annotate"""
